@@ -32,7 +32,7 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
   private dropDownOptions: IPropertyPaneDropdownOption[] = []; 
   private listsDropdownDisabled: boolean = true;
 
-
+  
   public render(): void {
     this.domElement.innerHTML = `
     <div class="${ styles.listView }">
@@ -43,7 +43,16 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
         </div>
     </div>`; 
     this.LoadViews();  
+    console.log('Hello!')
   }
+
+
+  private onDragStart(event) {
+    event
+      .dataTransfer
+      .setData('text/plain', event.target.id);
+  }
+
 
 
   protected get dataVersion(): Version {
@@ -72,6 +81,8 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
         this.render();
   
  }  
+
+
 
  private GetLists():void{  
   // REST API to pull the list names  
@@ -119,7 +130,7 @@ private RenderPageUrls(items: any): any {
     console.log(items[i].Cells[4]["Value"])
 
    html += `
-              <div class="${styles.column}">
+              <div id="item" class="${styles.column}" draggable="true">
                   <a class="${styles.title} "href="${items[i].Cells[4]["Value"]}">${items[i].Cells[2]["Value"]}</a>
                   <div class="${styles.description}" >${items[i].Cells[3]["Value"]}</div>
               </div> 
@@ -129,6 +140,18 @@ private RenderPageUrls(items: any): any {
   
   const listContainer: Element = this.domElement.querySelector('#spListContainer');
   listContainer.innerHTML = html;
+
+  const listItem: Element = this.domElement.querySelector('.item')
+
+  listItem.addEventListener('dragstart', dragStart);
+
+  function dragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.id);
+    setTimeout(() => {
+        e.target.classList.add('hide');
+    }, 0);
+
+}
 }
 
 
@@ -179,8 +202,7 @@ private LoadPageUrls(): void {
     let absUrl = this.context.pageContext.site.absoluteUrl + '/SitePages'
 
     let url = this.context.pageContext.web.absoluteUrl + 
-    `/_api/search/query?querytext=%27path:${absUrl} ShowInListView:yes%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27DefaultEncodingUrl,%20Title,%20Description,%20promotedstate,ShowInListView%27`;
-
+    `/_api/search/query?querytext=%27path:${absUrl} ShowInListView:yes%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27DefaultEncodingUrl,%20Title,%20Description,%20promotedstate,ShowInListView,ProgId%27`;
     return this.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
       .then((response: SPHttpClientResponse) => {
         return response.json();        
@@ -188,17 +210,21 @@ private LoadPageUrls(): void {
     }
   
 
+    
+
+
   private RenderMostViewed(items: any): any {
     
     let html: string = '';
 
     for(var i=0;i<items.length;i++){  
 
-      if (items[i].Cells[5]["Value"] == 0){
+      if (items[i].Cells[7]['Value'] == 'SharePoint.Link' || items[i].Cells[5]['Value'] == 0){
+
 
      html += 
      `       
-              <div class="${styles.column}">
+              <div id="item" class="${styles.column}" draggable="true">
                   <a class="${styles.title} "href="${items[i].Cells[2]["Value"]}">${items[i].Cells[3]["Value"]}</a>
                   <div class="${styles.description}" >${items[i].Cells[4]["Value"]}</div>
               </div>  
