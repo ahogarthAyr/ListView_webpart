@@ -35,7 +35,7 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
   
   public render(): void {
     this.domElement.innerHTML = `
-    <div class="${ styles.listView }">
+    <div id="box" class="${ styles.listView }">
         <div id="spListContainer" />
         <div class="${styles.icon}"><i class="ms-Icon ms-Icon--CustomList" aria-hidden="false"></i><br/></div>
         <div class="${styles.ddSelect}">
@@ -44,13 +44,6 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
     </div>`; 
     this.LoadViews();  
     console.log('Hello!')
-  }
-
-
-  private onDragStart(event) {
-    event
-      .dataTransfer
-      .setData('text/plain', event.target.id);
   }
 
 
@@ -112,8 +105,10 @@ private LoadDropDownValues(lists: spList[]): void{
 
 private GetPageUrls():Promise<any>{
 
-  let path = this.context.pageContext.web.absoluteUrl;
-  let pageUrl = this.context.pageContext.web.absoluteUrl + `/_api/search/query?querytext=%27path:${path}%20STS_ListItem_DocumentLibrary%20fileType:aspx%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27Title,Description,Path%27`;
+  let path = this.context.pageContext.web.absoluteUrl + '/' + this.properties.DropDownProp.replace(/\s/g, '');
+  console.log(path)
+  let pageUrl = this.context.pageContext.web.absoluteUrl 
+  + `/_api/search/query?querytext=%27path:${path}%20STS_ListItem_DocumentLibrary%20fileType:aspx%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27Title,Description,Path%27`;
 
   return this.context.spHttpClient.get(pageUrl, SPHttpClient.configurations.v1).then((response: SPHttpClientResponse)=>{  
     return response.json();  
@@ -127,7 +122,7 @@ private RenderPageUrls(items: any): any {
 
   for(var i=0;i<items.length;i++){  
     
-    console.log(items[i].Cells[4]["Value"])
+    // console.log(items[i].Cells[4]["Value"])
 
    html += `
               <div id="item" class="${styles.column}" draggable="true">
@@ -141,17 +136,6 @@ private RenderPageUrls(items: any): any {
   const listContainer: Element = this.domElement.querySelector('#spListContainer');
   listContainer.innerHTML = html;
 
-  const listItem: Element = this.domElement.querySelector('.item')
-
-  listItem.addEventListener('dragstart', dragStart);
-
-  function dragStart(e) {
-    e.dataTransfer.setData('text/plain', e.target.id);
-    setTimeout(() => {
-        e.target.classList.add('hide');
-    }, 0);
-
-}
 }
 
 
@@ -210,8 +194,6 @@ private LoadPageUrls(): void {
     }
   
 
-    
-
 
   private RenderMostViewed(items: any): any {
     
@@ -224,18 +206,21 @@ private LoadPageUrls(): void {
 
      html += 
      `       
-              <div id="item" class="${styles.column}" draggable="true">
+              <div id="item" class="${styles.column}" draggable="true" >
                   <a class="${styles.title} "href="${items[i].Cells[2]["Value"]}">${items[i].Cells[3]["Value"]}</a>
                   <div class="${styles.description}" >${items[i].Cells[4]["Value"]}</div>
               </div>  
     `;  
       }
+
     };
     
     const listContainer: Element = this.domElement.querySelector('#spListContainer');
     listContainer.innerHTML = html;
   }
 
+
+  
 
   private LoadViews(): void {
 

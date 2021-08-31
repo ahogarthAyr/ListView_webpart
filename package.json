@@ -1,6 +1,6 @@
 {
   "name": "list-view",
-  "version": "0.0.1",
+  "version": "1.0.0.2",
   "private": true,
   "main": "lib/index.js",
   "scripts": {
@@ -10,10 +10,11 @@
   },
   "dependencies": {
     "@microsoft/sp-core-library": "1.12.1",
+    "@microsoft/sp-lodash-subset": "1.12.1",
+    "@microsoft/sp-office-ui-fabric-core": "1.12.1",
     "@microsoft/sp-property-pane": "1.12.1",
     "@microsoft/sp-webpart-base": "1.12.1",
-    "@microsoft/sp-lodash-subset": "1.12.1",
-    "@microsoft/sp-office-ui-fabric-core": "1.12.1"
+    "@shopify/draggable": "^1.0.0-beta.8"
   },
   "devDependencies": {
     "@microsoft/sp-build-web": "1.12.1",
