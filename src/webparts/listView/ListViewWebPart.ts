@@ -28,6 +28,7 @@ export interface spLists{
     value: spList[];  
   }  
 
+
 export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebPartProps> {
   private dropDownOptions: IPropertyPaneDropdownOption[] = []; 
   private listsDropdownDisabled: boolean = true;
@@ -43,7 +44,7 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
         </div>
     </div>`; 
     this.LoadViews();  
-    console.log('Hello!')
+    console.log('Hello!!')
   }
 
 
@@ -106,7 +107,9 @@ private LoadDropDownValues(lists: spList[]): void{
 private GetPageUrls():Promise<any>{
 
   let path = this.context.pageContext.web.absoluteUrl + '/' + this.properties.DropDownProp.replace(/\s/g, '');
+  
   console.log(path)
+  
   let pageUrl = this.context.pageContext.web.absoluteUrl 
   + `/_api/search/query?querytext=%27path:${path}%20STS_ListItem_DocumentLibrary%20fileType:aspx%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27Title,Description,Path%27`;
 
@@ -122,12 +125,14 @@ private RenderPageUrls(items: any): any {
 
   for(var i=0;i<items.length;i++){  
     
-    // console.log(items[i].Cells[4]["Value"])
+    let url = items[i].Cells[4]["Value"];
+    let title = items[i].Cells[2]["Value"];
+    let description = items[i].Cells[3]["Value"];
 
-   html += `
+    html += `
               <div id="item" class="${styles.column}" draggable="true">
-                  <a class="${styles.title} "href="${items[i].Cells[4]["Value"]}">${items[i].Cells[2]["Value"]}</a>
-                  <div class="${styles.description}" >${items[i].Cells[3]["Value"]}</div>
+                  <a class="${styles.title} "href="${url}">${title}</a>
+                  <div class="${styles.description}" >${description}</div>
               </div> 
    `
   
@@ -136,6 +141,7 @@ private RenderPageUrls(items: any): any {
   const listContainer: Element = this.domElement.querySelector('#spListContainer');
   listContainer.innerHTML = html;
 
+  this.DragDrop();
 }
 
 
@@ -192,36 +198,103 @@ private LoadPageUrls(): void {
         return response.json();        
       });
     }
-  
 
 
   private RenderMostViewed(items: any): any {
     
+  
     let html: string = '';
 
     for(var i=0;i<items.length;i++){  
 
-      if (items[i].Cells[7]['Value'] == 'SharePoint.Link' || items[i].Cells[5]['Value'] == 0){
+// Reminder: ProgID index is 6 on connects
 
+      if (items[i].Cells[6]['Value'] == 'SharePoint.Link' || items[i].Cells[5]['Value'] == 0){
+
+        let url = items[i].Cells[2]["Value"];
+        let title = items[i].Cells[3]["Value"];
+        let description = items[i].Cells[4]["Value"];
 
      html += 
      `       
-              <div id="item" class="${styles.column}" draggable="true" >
-                  <a class="${styles.title} "href="${items[i].Cells[2]["Value"]}">${items[i].Cells[3]["Value"]}</a>
-                  <div class="${styles.description}" >${items[i].Cells[4]["Value"]}</div>
+              <div id="item" class="${styles.column}" draggable="true" }>
+                  <a class="${styles.title} "href="${url}">${title}</a>
+                  <div class="${styles.description}" >${description}</div>
               </div>  
     `;  
       }
 
     };
-    
     const listContainer: Element = this.domElement.querySelector('#spListContainer');
-    listContainer.innerHTML = html;
+    listContainer.innerHTML = html; 
+
+    this.DragDrop();
+    
   }
-
-
   
 
+  private DragDrop(){
+
+    var dragSrcEl = null;
+
+    function handleDragStart(e) {
+      this.style.opacity = "0.4";
+    
+      dragSrcEl = this;
+    
+      e.dataTransfer.effectAllowed = "move";
+    }
+    
+    function handleDragOver(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+    
+      e.dataTransfer.dropEffect = "move";
+      return false;
+    }
+    
+    function handleDragEnter(e) {
+      this.classList.add("over");
+    }
+    
+    function handleDragLeave(e) {
+      this.classList.remove("over");
+    }
+    
+    function handleDrop(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+    
+      if (dragSrcEl != this) {
+        this.replaceWith(this, dragSrcEl);
+      }
+    
+      return false;
+    }
+    
+    function handleDragEnd(e) {
+      this.style.opacity = "1";
+    
+      elements.forEach(function (element) {
+        element.classList.remove("over");
+      });
+    }
+   
+
+    let elements = document.querySelectorAll('#spListContainer #item')
+    elements.forEach(function (element) {
+      element.addEventListener("dragstart", handleDragStart, false);
+      element.addEventListener("dragenter", handleDragEnter, false);
+      element.addEventListener("dragover", handleDragOver, false);
+      element.addEventListener("dragleave", handleDragLeave, false);
+      element.addEventListener("drop", handleDrop, false);
+      element.addEventListener("dragend", handleDragEnd, false);
+    });
+  }
+
+  
   private LoadViews(): void {
 
     this.GetMostViewed().then((data)=>{
