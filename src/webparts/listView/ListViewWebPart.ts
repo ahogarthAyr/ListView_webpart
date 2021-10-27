@@ -201,39 +201,40 @@ private LoadPageUrls(): void {
     let absUrl = this.context.pageContext.site.absoluteUrl + '/SitePages'
 
     let url = this.context.pageContext.web.absoluteUrl + 
-    `/_api/search/query?querytext=%27path:${absUrl} ShowInListView:yes%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27DefaultEncodingUrl,%20Title,%20Description,%20promotedstate,ShowInListView,ProgId%27`;
+    `/_api/search/query?querytext=%27path:${absUrl} ShowInListView:yes%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27DefaultEncodingUrl,%20Title,%20Description,%20promotedstate,ShowInListView,ProgId,Section,SectionB%27`;
     return this.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
       .then((response: SPHttpClientResponse) => {
         return response.json();        
       });
     }
 
-
+    
   private RenderMostViewed(items: any): any {
   
     let html: string = '';
-
+    
     for(var i=0;i<items[i].Cells.length;i++){  
       var cells = items[i].Cells
-
+      // console.log(cells);
       for(var j=0;j<cells.length;j++){
         var key = cells[j]['Key'];
 
         if(key == 'Title'){
           var title = cells[j]['Value'];
+          // console.log('title:' + ' ' + title)
         }
-        if (key == 'Description'){
+        else if (key == 'Description'){
           var description = cells[j]['Value'];
         }
-        if(key == 'DefaultEncodingUrl'){
+        else if(key == 'DefaultEncodingUrl'){
           var url = cells[j]['Value'];
         }
-        if(key == 'ProgId'){
+        else if(key == 'ProgId'){
           var progId = cells[j]['Value'];
         }
-        if(key == 'promotedstate'){
+        else if(key == 'promotedstate'){
           var promState = cells[j]['Value'];
-        
+          
         if(progId == 'SharePoint.Link' || promState == 0){
 
         html += 
@@ -243,12 +244,14 @@ private LoadPageUrls(): void {
                 <div class="${styles.description}" >${description}</div>
             </div>  
         `;  
-        }
-       };
+        
+    }
+  }
         const listContainer: Element = this.domElement.querySelector('#spListContainer');
         listContainer.innerHTML = html; 
-    }
-   }
+      }
+    } 
+   
  }
   
   private LoadViews(): void {
