@@ -3,7 +3,7 @@
   "solution": {
     "name": "list-view-client-side-solution",
     "id": "f6b4f8c7-4405-4bbb-89dc-4f281984c8f2",
-    "version": "1.0.5.2",
+    "version": "1.0.6.2",
     "includeClientSideAssets": true,
     "isDomainIsolated": false,
     "developer": {

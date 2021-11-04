@@ -44,7 +44,7 @@ export default class ListViewWebPart extends BaseClientSideWebPart<IListViewWebP
         </div>
     </div>`; 
     this.LoadViews();  
-    console.log('Hello!!?')
+    console.log('Hello!!')
   }
 
 
@@ -201,7 +201,8 @@ private LoadPageUrls(): void {
     let absUrl = this.context.pageContext.site.absoluteUrl + '/SitePages'
 
     let url = this.context.pageContext.web.absoluteUrl + 
-    `/_api/search/query?querytext=%27path:${absUrl} ShowInListView:yes%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27DefaultEncodingUrl,%20Title,%20Description,%20promotedstate,ShowInListView,ProgId,Section,SectionB%27`;
+    `/_api/search/query?querytext=%27path:${absUrl} ShowInListView:yes%27&rowlimit=30&sortlist=%27ViewsLifetime:descending%27&selectproperties=%27Title,Description,DefaultEncodingUrl,ProgId,%20promotedstate,ShowInListView%27&trimduplicates=false`;
+   console.log(url)
     return this.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
       .then((response: SPHttpClientResponse) => {
         return response.json();        
